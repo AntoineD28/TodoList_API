@@ -24,7 +24,8 @@ La chaîne de connexion se trouve dans les propriétés de la base de données (
 - Executer les migrations :
 `dotnet ef database update`
 
-Vérifier que les tables suivantes ont bien été ajoutées : 
+- Vérifier que les tables suivantes ont bien été ajoutées :
+- 
 ![Tables de la base de données](./Pictures/BDDTables.png)
 
 Lancer le projet et la fenêtre avec l'url suivante s'ouvre : https://localhost:7075/swagger/index.html
