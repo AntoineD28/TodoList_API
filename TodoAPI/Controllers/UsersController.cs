@@ -9,6 +9,7 @@ using Microsoft.Build.Framework;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using TodoAPI.Models;
+using TodoAPI.Models.Dto;
 
 namespace TodoAPI.Controllers
 {
@@ -28,9 +29,20 @@ namespace TodoAPI.Controllers
 
         // GET: api/Users
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<User>>> GetUsers()
+        public async Task<object> GetUsers()
         {
-            return await _context.Users.ToListAsync();
+            return await _context.Users.Select(u => new
+            {
+                u.Id,
+                u.Username,
+                u.Password,
+                u.Email,
+                u.CreateTime,
+                TodoItems = u.
+                    TodoItems
+                    .Select(t => new { t.Title, t.Description, t.IsCompleted })
+                    .ToList()
+            }).ToListAsync();
         }
 
         // GET: api/Users/5
@@ -81,14 +93,16 @@ namespace TodoAPI.Controllers
         // POST: api/Users
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
-        public async Task<ActionResult<User>> PostUser(User user)
+        public async Task<ActionResult<User>> PostUser(UserRegisterDto user)
         {
+            User _user = new(user.Username, user.Email, user.Password);
+
             // On entre le hash du mdp dans la bdd
-            user.Password = _passwordHasher.HashPassword(user, user.Password);
-            _context.Users.Add(user);
+            _user.Password = _passwordHasher.HashPassword(_user, user.Password);
+            _context.Users.Add(_user);
             await _context.SaveChangesAsync();
 
-            return CreatedAtAction("GetUser", new { id = user.Id }, user);
+            return CreatedAtAction("GetUser", new { id = _user.Id }, _user);
         }
 
         // DELETE: api/Users/5

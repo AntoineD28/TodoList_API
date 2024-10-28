@@ -32,9 +32,11 @@ public partial class TodoListContext : DbContext
             entity.ToTable("TodoItem");
 
             entity.Property(e => e.Id).HasColumnName("ID");
+
             entity.Property(e => e.CreateTime)
-                .HasDefaultValueSql("(getdate())")
-                .HasColumnType("datetime");
+                  .HasDefaultValueSql("(getdate())")
+                  .HasColumnType("datetime");
+
             entity.Property(e => e.Title).HasMaxLength(100);
             entity.Property(e => e.UpdateTime).HasColumnType("datetime");
         });
@@ -47,11 +49,17 @@ public partial class TodoListContext : DbContext
 
             entity.Property(e => e.Id).HasColumnName("ID");
             entity.Property(e => e.CreateTime)
-                .HasDefaultValueSql("(getdate())")
-                .HasColumnType("datetime");
+                  .HasDefaultValueSql("(getdate())")
+                  .HasColumnType("datetime");
+
             entity.Property(e => e.Email).HasMaxLength(100);
             entity.Property(e => e.Password).HasMaxLength(255);
             entity.Property(e => e.Username).HasMaxLength(50);
+
+            entity.HasMany(e => e.TodoItems)
+                  .WithOne(e => e.User)
+                  .HasForeignKey(e => e.UserId)
+                  .HasPrincipalKey(e => e.Id);
         });
 
         OnModelCreatingPartial(modelBuilder);

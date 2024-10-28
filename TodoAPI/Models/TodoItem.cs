@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Text.Json.Serialization;
 
 namespace TodoAPI.Models;
 
@@ -16,4 +17,10 @@ public partial class TodoItem
     public DateTime? UpdateTime { get; set; }
 
     public DateTime CreateTime { get; set; }
+
+    public int UserId { get; set; }
+
+    // To avoid cycle references
+    [JsonIgnore]
+    public User User { get; set; } = null!;
 }

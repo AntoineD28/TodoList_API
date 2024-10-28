@@ -1,6 +1,6 @@
-﻿namespace TodoAPI.Models
+﻿namespace TodoAPI.Models.Dto
 {
-    public class UserDTO
+    public class UserLoginDto
     {
         public string Username { get; set; } = null!;
         public string Password { get; set; } = null!;

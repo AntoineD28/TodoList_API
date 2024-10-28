@@ -7,6 +7,7 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 using TodoAPI.Models;
+using TodoAPI.Models.Dto;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -31,22 +32,20 @@ namespace TodoAPI.Controllers
         // POST: api/<Connexion>
         //Task<ActionResult<User>>
         [HttpPost]
-        public IActionResult PostConnexion(UserDTO u)
+        public IActionResult PostConnexion(UserLoginDto u)
         {
             try
             {
-                var user = _context.Users.First(i => i.Username == u.Username);
+                User user = _context.Users.First(i => i.Username == u.Username);
 
                 // On vérifie le hash stocké en BDD et le hash du password fourni par l'utilisateur
                 PasswordVerificationResult passwordVerificationResult = _passwordHasher.VerifyHashedPassword(user, user.Password, u.Password);
                 if (passwordVerificationResult == 0)
                 {
                     return Unauthorized("Invalid credentials");
-                    //return Task.FromResult<ActionResult<User>>(NotFound());
                 }
                 var token = GenerateAccessToken(user.Username);
                 return Ok(new { user.Id, user.Username, user.Email, AccessToken = new JwtSecurityTokenHandler().WriteToken(token) });
-                //return Task.FromResult<ActionResult<User>>(user);
             }
             catch (Exception ex)
             {
