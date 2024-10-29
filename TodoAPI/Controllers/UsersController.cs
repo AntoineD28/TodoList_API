@@ -31,6 +31,7 @@ namespace TodoAPI.Controllers
         [HttpGet]
         public async Task<object> GetUsers()
         {
+            // on ajoute à chaque utlisateur sa liste de tâches
             return await _context.Users.Select(u => new
             {
                 u.Id,

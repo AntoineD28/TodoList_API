@@ -13,6 +13,7 @@ using TodoAPI.Models.Dto;
 
 namespace TodoAPI.Controllers
 {
+    //[Authorize]
     [Route("api/[controller]")]
     [ApiController]
     public class TodoItemsController : ControllerBase
@@ -26,7 +27,6 @@ namespace TodoAPI.Controllers
 
         // GET: api/TodoItems
         [HttpGet]
-        [Authorize]
         public async Task<ActionResult<IEnumerable<TodoItem>>> GetTodoItems()
         {
             return await _context.TodoItems.ToListAsync();
@@ -34,7 +34,6 @@ namespace TodoAPI.Controllers
 
         // GET: api/TodoItems/5
         [HttpGet("{id}")]
-        [Authorize]
         public async Task<ActionResult<TodoItem>> GetTodoItem(int id)
         {
             var todoItem = await _context.TodoItems.FindAsync(id);
@@ -49,7 +48,6 @@ namespace TodoAPI.Controllers
 
         // GET: api/TodoItems/User/1
         [HttpGet("User/{userId}")]
-        [Authorize]
         public async Task<ActionResult<IEnumerable<TodoItem>>> GetTodoItemByUser(int userId)
         {
             var todoItems = await _context.TodoItems.Where(p => p.UserId == userId).ToListAsync();
@@ -65,15 +63,18 @@ namespace TodoAPI.Controllers
         // PUT: api/TodoItems/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
-        [Authorize]
-        public async Task<IActionResult> PutTodoItem(int id, TodoItem todoItem)
+        public async Task<IActionResult> UpdateTodoItem(int id, TodoItemUpdateDto todoItemDto)
         {
-            if (id != todoItem.Id)
+            var todoItem = await _context.TodoItems.FindAsync(id);
+            if (todoItem == null)
             {
-                return BadRequest();
+                return NotFound();
             }
 
-            _context.Entry(todoItem).State = EntityState.Modified;
+            todoItem.Title = todoItemDto.Title;
+            todoItem.Description = todoItemDto.Description;
+            todoItem.IsCompleted = todoItemDto.IsCompleted;
+            todoItem.UpdateTime = DateTime.UtcNow; // Mise à jour de la date
 
             try
             {
@@ -91,19 +92,19 @@ namespace TodoAPI.Controllers
                 }
             }
 
-            return NoContent();
+            return Ok(todoItem);
         }
+
 
         // POST: api/TodoItems
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
-        [Authorize]
-        public async Task<ActionResult<TodoItem>> PostTodoItem(TodoItemRequestDto TIRD)
+        public async Task<ActionResult<TodoItem>> PostTodoItem(TodoItemPostDto TI)
         {
             try
             {
                 // On récupère l'utilisateur avec l'ID donné
-                User u = _context.Users.ElementAt(TIRD.UserId);
+                User u = _context.Users.ElementAt(TI.UserId);
 
                 // Si l'utilsateur n'est pas trouvé aucun tâche ne sera créée 
                 if (u == null)
@@ -114,9 +115,9 @@ namespace TodoAPI.Controllers
                 // On créer le TodoItem a partir du dto
                 TodoItem todoItem = new()
                 {
-                    Title = TIRD.Title,
-                    Description = TIRD.Description,
-                    UserId = TIRD.UserId,
+                    Title = TI.Title,
+                    Description = TI.Description,
+                    UserId = TI.UserId,
                     IsCompleted = false,
                 };
 
@@ -134,7 +135,6 @@ namespace TodoAPI.Controllers
 
         // DELETE: api/TodoItems/5
         [HttpDelete("{id}")]
-        [Authorize]
         public async Task<IActionResult> DeleteTodoItem(int id)
         {
             var todoItem = await _context.TodoItems.FindAsync(id);
